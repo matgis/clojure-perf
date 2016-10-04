@@ -64,7 +64,17 @@
         (persistent! out)
         (recur (inc i)
                (next in)
-               (assoc! out i (f (first in))))))))
+               (assoc! out i (f (first in)))))))
+
+  (let [vcoll (vec coll)]
+    (measure
+      (let [size (count vcoll)
+            out (transient [])]
+        (loop [i 0]
+          (if (= i size)
+            (persistent! out)
+            (do (conj! out (f (vcoll i)))
+                (recur (inc i)))))))))
 
 
 (defn measure-map-filter-into-vector
@@ -80,6 +90,15 @@
 
   (measure
     (into [] (comp (map f) (filter pred)) coll))
+
+  (measure
+    (persistent! (reduce (fn [out elem]
+                           (let [out-elem (f elem)]
+                             (if (pred out-elem)
+                               (conj! out out-elem)
+                               out)))
+                         (transient [])
+                         coll)))
 
   (measure
     (loop [in coll
@@ -103,8 +122,52 @@
                    (conj! out elem)
                    out)))))))
 
+(defn measure-mapcat-into-vector
+  [coll f]
+  (measure
+    (vec (mapcat f coll)))
+
+  (measure
+    (into [] (r/mapcat f coll)))
+
+  (measure
+    (into [] (mapcat f) coll))
+
+  (measure
+    (persistent! (reduce (fn [out elem]
+                           (doseq [out-elem (f elem)]
+                             (conj! out out-elem))
+                           out)
+                         (transient [])
+                         coll)))
+  (measure
+    (loop [in coll
+           out (transient [])]
+      (if-not (seq in)
+        (persistent! out)
+        (do (doseq [out-elem (f (first in))]
+              (conj! out out-elem))
+            (recur (next in)
+                   out))))))
+
+(defn measure-zip-into-vector
+  [a b f]
+  (measure
+    (vec (map f a b)))
+
+  (measure
+    (mapv f a b))
+
+  (measure
+    (into [] (map f a b)))
+
+  (measure
+    (into [] (sequence (map f) a b))))
+
 (defn -main
   [& raw-args]
   (measure-seq-starts-with (range 1000) (range 1000))
   (measure-map-into-vector (range 1000) inc)
-  (measure-map-filter-into-vector (range 1000) inc even?))
+  (measure-map-filter-into-vector (range 1000) inc even?)
+  (measure-mapcat-into-vector (range 1000) (partial repeat 4))
+  (measure-zip-into-vector (range 1000) (range 1000) +))
