@@ -12,7 +12,18 @@
          (quick-bench ~expr)
          (pprint/fresh-line))))
 
-(defn measure-seq-starts-with
+(defmacro defbench
+  [name args & body]
+  `(defn ~name
+     ~args
+     (println)
+     (println "------------------------------------------------------------")
+     (println '~name)
+     (println "------------------------------------------------------------")
+     (println)
+     ~@body))
+
+(defbench seq-starts-with
   [a b]
   (measure
     (= b (take (count b) a)))
@@ -34,7 +45,7 @@
           (and (= (first coll) (first subcoll))
                (recur (next coll) (next subcoll))))))))
 
-(defn measure-map-into-vector
+(defbench map-into-vector
   [coll f]
   (measure
     (vec (map f coll)))
@@ -77,7 +88,7 @@
                 (recur (inc i)))))))))
 
 
-(defn measure-map-filter-into-vector
+(defbench map-filter-into-vector
   [coll f pred]
   (measure
     (vec (filter pred (map f coll))))
@@ -122,7 +133,7 @@
                    (conj! out elem)
                    out)))))))
 
-(defn measure-mapcat-into-vector
+(defbench mapcat-into-vector
   [coll f]
   (measure
     (vec (mapcat f coll)))
@@ -150,7 +161,7 @@
             (recur (next in)
                    out))))))
 
-(defn measure-zip-into-vector
+(defbench zip-into-vector
   [a b f]
   (measure
     (vec (map f a b)))
@@ -166,8 +177,8 @@
 
 (defn -main
   [& raw-args]
-  (measure-seq-starts-with (range 1000) (range 1000))
-  (measure-map-into-vector (range 1000) inc)
-  (measure-map-filter-into-vector (range 1000) inc even?)
-  (measure-mapcat-into-vector (range 1000) (partial repeat 4))
-  (measure-zip-into-vector (range 1000) (range 1000) +))
+  (seq-starts-with (range 1000) (range 1000))
+  (map-into-vector (range 1000) inc)
+  (map-filter-into-vector (range 1000) inc even?)
+  (mapcat-into-vector (range 1000) (partial repeat 4))
+  (zip-into-vector (range 1000) (range 1000) +))
