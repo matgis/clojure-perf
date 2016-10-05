@@ -67,7 +67,6 @@
             (do (conj! out (f (vcoll i)))
                 (recur (inc i)))))))))
 
-
 (defbench map-filter-into-vector
   [coll f pred]
   (measure

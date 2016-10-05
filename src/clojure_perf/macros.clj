@@ -1,8 +1,7 @@
 (ns clojure-perf.macros
   (:require [clojure.pprint :as pprint]
             [clojure.string :as string]
-            [criterium.core :as criterium])
-  (:gen-class))
+            [criterium.core :as criterium]))
 
 (def ^:private dividing-line-width 80)
 (def dividing-line-thin (apply str (repeat dividing-line-width \-)))
