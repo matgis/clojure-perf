@@ -1,15 +1,25 @@
 (ns clojure-perf.main
   (:require [clojure.pprint :as pprint]
             [clojure.core.reducers :as r]
+            [clojure.string :as string]
             [criterium.core :refer [quick-bench with-progress-reporting]])
   (:gen-class))
+
+(def ^:private dividing-line-width 80)
+(def ^:private dividing-line-thin (apply str (repeat dividing-line-width \-)))
+(def ^:private dividing-line-thick (apply str (repeat dividing-line-width \=)))
 
 (defmacro measure
   [& body]
   (let [expr (if (second body) (cons 'do body) (first body))]
     `(do (pprint/write '~expr :dispatch pprint/code-dispatch)
          (pprint/fresh-line)
-         (quick-bench ~expr)
+         (let [output# (with-out-str (quick-bench ~expr))
+               lines# (-> output# string/trim-newline string/split-lines)]
+           (println ";")
+           (doseq [line# lines#]
+             (println ";" line#)))
+         (println ";" dividing-line-thin)
          (pprint/fresh-line))))
 
 (defmacro defbench
@@ -17,9 +27,8 @@
   `(defn ~name
      ~args
      (println)
-     (println "------------------------------------------------------------")
-     (println '~name)
-     (println "------------------------------------------------------------")
+     (println ";" '~name)
+     (println ";" dividing-line-thick)
      (println)
      ~@body))
 
