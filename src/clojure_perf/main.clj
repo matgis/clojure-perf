@@ -126,17 +126,6 @@
           (recur (next in)
                  (if (pred elem)
                    (conj! out elem)
-                   out))))))
-
-  (measure
-    (loop [in coll
-           out (transient [])]
-      (if (empty? in)
-        (persistent! out)
-        (let [elem (f (first in))]
-          (recur (next in)
-                 (if (pred elem)
-                   (conj! out elem)
                    out)))))))
 
 (defbench mapcat-into-vector
