@@ -45,9 +45,9 @@
 
   (measure
     (loop [coll a subcoll b]
-      (if-not (seq subcoll)
+      (if (empty? subcoll)
         true
-        (if-not (seq coll)
+        (if (empty? coll)
           false
           (and (= (first coll) (first subcoll))
                (recur (next coll) (next subcoll))))))))
@@ -69,7 +69,7 @@
   (measure
     (loop [in coll
            out (transient [])]
-      (if-not (seq in)
+      (if (empty? in)
         (persistent! out)
         (recur (next in)
                (conj! out (f (first in)))))))
@@ -78,7 +78,7 @@
     (loop [i 0
            in coll
            out (transient (vec coll))]
-      (if-not (seq in)
+      (if (empty? in)
         (persistent! out)
         (recur (inc i)
                (next in)
@@ -120,7 +120,7 @@
   (measure
     (loop [in coll
            out (transient [])]
-      (if-not (seq in)
+      (if (empty? in)
         (persistent! out)
         (let [elem (f (first in))]
           (recur (next in)
@@ -131,7 +131,7 @@
   (measure
     (loop [in coll
            out (transient [])]
-      (if-not (seq in)
+      (if (empty? in)
         (persistent! out)
         (let [elem (f (first in))]
           (recur (next in)
@@ -160,7 +160,7 @@
   (measure
     (loop [in coll
            out (transient [])]
-      (if-not (seq in)
+      (if (empty? in)
         (persistent! out)
         (do (doseq [out-elem (f (first in))]
               (conj! out out-elem))
