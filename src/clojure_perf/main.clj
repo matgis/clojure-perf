@@ -3,6 +3,33 @@
             [clojure-perf.macros :refer [defbench measure]])
   (:gen-class))
 
+(defbench predicate-find
+  [coll pred]
+  (measure
+    (first (filter pred coll)))
+
+  (measure
+    (reduce (fn [_ elem]
+              (when (pred elem)
+                (reduced elem)))
+            nil
+            coll))
+
+  (measure
+    (r/reduce (fn [_ elem]
+                (when (pred elem)
+                  (reduced elem)))
+              nil
+              coll))
+
+  (measure
+    (loop [in coll]
+      (when (seq in)
+        (let [elem (first in)]
+          (if (pred elem)
+            elem
+            (recur (next in))))))))
+
 (defbench seq-starts-with
   [a b]
   (measure
@@ -156,6 +183,7 @@
 
 (defn -main
   [& raw-args]
+  (predicate-find (range 1000) (partial = 500))
   (seq-starts-with (range 1000) (range 1000))
   (map-into-vector (range 1000) inc)
   (map-filter-into-vector (range 1000) inc even?)
