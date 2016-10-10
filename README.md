@@ -9,8 +9,13 @@ Fork to add your own measurements, then `lein run`. Outputs Clojure-formatted co
 ## Sample output
 
 ```clj
-; map-filter-into-vector
-; ================================================================================
+'
+[;================================================================================
+  map-filter-into-vector
+    coll (range 1000)
+    f inc
+    pred even?
+];================================================================================
 
 (vec (filter pred (map f coll)))
 ;

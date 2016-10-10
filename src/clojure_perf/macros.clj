@@ -4,8 +4,8 @@
             [criterium.core :as criterium]))
 
 (def ^:private dividing-line-width 80)
-(def dividing-line-thin (apply str (repeat dividing-line-width \-)))
-(def dividing-line-thick (apply str (repeat dividing-line-width \=)))
+(def ^:private dividing-line-thin (apply str (repeat dividing-line-width \-)))
+(def ^:private dividing-line-thick (apply str (repeat dividing-line-width \=)))
 
 (defmacro measure
   [& body]
@@ -17,15 +17,21 @@
            (println ";")
            (doseq [line# lines#]
              (println ";" line#)))
-         (println ";" dividing-line-thin)
+         (println ~(str "; " dividing-line-thin))
          (pprint/fresh-line))))
 
 (defmacro defbench
   [name args & body]
-  `(defn ~name
+  `(defmacro ~name
      ~args
-     (println)
-     (println ";" '~name)
-     (println ";" dividing-line-thick)
-     (println)
-     ~@body))
+     (let [pair# (gensym "pair")]
+       `(do (println)
+            (println \')
+            (println ~~(str "[;" dividing-line-thick))
+            (println ~~(str "  " name))
+            (doseq [~pair# (sort-by first (quote ~~(mapv (fn [arg] [(str arg) arg]) args)))]
+              (println "   " (first ~pair#) (second ~pair#)))
+            (println ~~(str "];" dividing-line-thick))
+            (println)
+            (let ~~(into [] (mapcat (fn [arg] [(list 'quote arg) arg])) args)
+              ~~@(map (fn [form] (list 'quote form)) body))))))
