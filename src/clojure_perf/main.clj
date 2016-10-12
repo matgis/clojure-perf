@@ -140,6 +140,9 @@
     (into [] (mapcat f) coll))
 
   (measure
+    (into [] (comp (map f) cat) coll))
+
+  (measure
     (persistent! (reduce (fn [out elem]
                            (doseq [out-elem (f elem)]
                              (conj! out out-elem))
