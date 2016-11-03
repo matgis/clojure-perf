@@ -173,6 +173,45 @@
   (measure
     (into [] (sequence (map f) a b))))
 
+(defbench if-not-empty?
+  [coll]
+  (measure
+    (if (not (empty? coll))
+      true))
+
+  (measure
+    (if (not-empty coll)
+      true))
+
+  (measure
+    (if (seq coll)
+      true))
+
+  (measure
+    (if (some identity coll)
+      true))
+
+  (measure
+    (if (first coll)
+      true))
+
+  (measure
+    (if (not= 0 (count coll))
+      true))
+
+  (let [jcoll ^java.util.Collection (vec coll)]
+    (measure
+      (if (not (.isEmpty jcoll))
+        true)))
+
+  (measure
+    (if (reduce (fn [_ _] (reduced true)) false coll)
+      true))
+
+  (measure
+    (if (r/reduce (fn [_ _] (reduced true)) false coll)
+      true)))
+
 (defn -main
   [& raw-args]
   (predicate-find (range 1000) (partial = 500))
@@ -180,4 +219,5 @@
   (map-into-vector (range 1000) inc)
   (map-filter-into-vector (range 1000) inc even?)
   (mapcat-into-vector (range 1000) (partial repeat 4))
-  (zip-into-vector (range 1000) (range 1000) +))
+  (zip-into-vector (range 1000) (range 1000) +)
+  (if-not-empty? (range 1000)))
